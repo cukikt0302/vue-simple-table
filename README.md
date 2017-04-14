@@ -5,3 +5,5 @@ Contain component
 https://github.com/vmaimone/vue-context-menu
 
 > full example in general.vue
+
+Demo and guide in future
