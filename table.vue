@@ -101,6 +101,10 @@
 </style>
 
 <script>
+/*
+* create: Nguyen Ke Nhat
+* date: 04/14/2017
+**/
 	export default {
 		name: 'post-general',
 
