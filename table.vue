@@ -103,7 +103,8 @@
 <script>
 /*
 * create: Nguyen Ke Nhat
-* date: 04/14/2017
+* Date: 04/14/2017
+* Github: https://github.com/cukikt0302/vue-simple-table
 **/
 	export default {
 		name: 'post-general',
