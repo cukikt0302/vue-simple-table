@@ -15,60 +15,66 @@ FULL example
 <div>
   <my-table ref="my_table"
     :header="header" :body="body" :data="data" :action="action"
-    :config="{table_class: 'table table-striped', checkbox: true, edit_row: true}" 
+    :config="{
+      table_class: 'table table-striped', 
+      checkbox: true, 
+      edit_row: true,
+      sort: true
+    }" 
     @edit="edit" checkbox_method="set_checkbox" @set_checkbox="set_checkbox">
 
-    <!-- slot for edit row -->
     <template slot="edit_row" scope="res">
-      <form @submit.prevent="" role="form" @keyup.esc="$refs.my_table.cancel_edit_row">
+      <form @submit.prevent="submit_row(res.row)" role="form" 
+      @keyup.esc="$refs.my_table.cancel_edit_row">
 
-        <div class="col-md-6">
+        <div class="col-md-4 col-md-offset-2">
           <div class="form-group">
             <label for="title">Title</label>
-            <input type="text" class="form-control input-sm" 
-            id="title" placeholder="Title" :value="res.row.title">
+            <input type="text" class="form-control input-sm" v-focus  id="title" 
+            placeholder="Title" v-model="action.edit_row.title = res.row.title">
           </div>
 
           <div class="form-group">
-            <label for="def">Def</label>
-            <input type="text" class="form-control input-sm" 
-            id="def" placeholder="Input field">
+            <label for="create">Created</label>
+            <input type="text" class="form-control input-sm" id="create" 
+            placeholder="Created" v-model="action.edit_row.create = res.row.create">
           </div>
         </div>
-        <div class="col-md-6">
-          <div class="form-group">
-            <label for="gha">Gha</label>
-            <input type="text" class="form-control input-sm" 
-            id="gha" placeholder="Title">
-          </div>
+        <div class="col-md-4">
 
           <div class="form-group">
             <label for="category">Category</label>
-            <select name="category" id="category" class="form-control input-sm">
-              <option value="Default">Default</option>
-              <option value="Internet">Internet</option>
-              <option value="Cooking">Cooking</option>
+            <select name="category" id="category" class="form-control input-sm" 
+            v-model="action.edit_row.category = res.row.category">
+              <option :value="'Default'">Default</option>
+              <option :value="'Internet'">Internet</option>
+              <option :value="'Cooking'">Cooking</option>
             </select>
+          </div>
+
+          <div class="form-group">
+            <label for="author">Author</label>
+            <input type="text" class="form-control input-sm" id="author" placeholder="Author"
+            :value="res.row.author" v-model="action.edit_row.author = res.row.author">
           </div>
         </div>
 
-        <div class="col-md-12">
+        <div class="col-md-8 col-md-offset-2">
           <button type="submit" class="btn btn-flat btn-sm btn-primary">Submit</button>
           <button type="button" class="btn btn-flat btn-sm btn-default" 
           @click.prevent="$refs.my_table.cancel_edit_row()">Cancel</button>
         </div>
       </form>
     </template>
-    <!-- slot for edit row -->
 
     <template slot="input" scope="res">
-      <input type="text" v-model="action.edit_value"
+      <input type="text" v-focus v-selected v-model="action.edit_value"
       class="input-sm form-control" @blur="reset_edit(res)" 
       @keydown.enter="submit(res)" @keydown.esc="reset_edit(res)">
     </template>
 
     <template slot="select" scope="res">
-      <select class="input-sm form-control" 
+      <select v-focus class="input-sm form-control" 
       v-model="action.edit_value" @blur="submit(res)"
       @keydown.enter="submit(res)" @keydown.esc="reset_edit(res)">
         <option :value="'Default'">Default</option>
@@ -78,7 +84,7 @@ FULL example
     </template>
 
     <template slot="textarea" scope="res">
-      <textarea rows="1" class="input-sm form-control" 
+      <textarea rows="1" v-focus class="input-sm form-control" 
       @blur="reset_edit(res)" @keydown.enter="submit(res)"
       @keydown.esc="reset_edit(res)" v-model="action.edit_value"></textarea>
     </template>
@@ -90,17 +96,21 @@ FULL example
 </div>
 </template>
 
+<style>
+	.cursor-pointer { cursor: pointer; }
+</style>
+
 <script>
 export default {
   name: 'post-general',
   data() {
     return {
-      header: [
+      header: [// key: name of column for sort, not sort not set this
         { title: 'ID', class: 'text-center' },
-        { title: 'Title' },
-        { title: 'Category' },
+        { title: 'Title', key: 'title', class: 'cursor-pointer' },
+        { title: 'Category', key: 'category', class: 'cursor-pointer' },
         { title: 'Create', class: 'text-center' },
-        { title: 'Author' }
+        { title: 'Author', key: 'author', class: 'cursor-pointer' }
       ],
       body: [
         { class: 'text-center' },
