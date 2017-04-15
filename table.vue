@@ -1,103 +1,103 @@
 <template>
-	<div>
-		<table :class="config.table_class">
-			
-			<thead>
-				<tr>
-					<th class="text-capitalize" v-for="(thead, k, i) in header" :class="thead.class">
-						<span v-if="config.checkbox && k === 0">
-							<input type="checkbox" v-model="checkall">
-						</span>
-						<span v-else>{{ thead.title }}</span>
-					</th>
-				</tr>
-			</thead>
+<div>
+  <table :class="config.table_class">
 
-			<tbody>
-				<tr v-for="(row, r) in data" :class="{'tr-active': context_menu_row.id === row.id}"
-				@contextmenu.prevent="$refs.ctxMenu.open($event, row)"
-				v-if="row.id !== toggle_edit_row">
+    <thead>
+      <tr>
+        <th class="text-capitalize" v-for="(thead, k, i) in header" :class="thead.class">
+          <span v-if="config.checkbox && k === 0">
+            <input type="checkbox" v-model="checkall">
+          </span>
+          <span v-else>{{ thead.title }}</span>
+        </th>
+      </tr>
+    </thead>
 
-					<td v-for="(item, k, c) in row" :key="item.id" :class="body[c].class">
+    <tbody>
+      <tr v-for="(row, r) in data" :class="{'tr-active': context_menu_row.id === row.id}"
+      @contextmenu.prevent="$refs.ctxMenu.open($event, row)"
+      v-if="row.id !== toggle_edit_row">
 
-						<div v-if="body[c].hasOwnProperty('method') && has_ev(body[c].method)">
+        <td v-for="(item, k, c) in row" :key="item.id" :class="body[c].class">
 
-							<span v-if="check_ev(body[c].method, 'click')" 
-							@click="click(check_ev(body[c].method, 'click'), row, r, c, k)">
-								{{ item }}
-							</span>
+          <div v-if="body[c].hasOwnProperty('method') && has_ev(body[c].method)">
 
-							<span v-else-if="check_ev(body[c].method, 'dblclick')"
-							@dblclick="dblclick(check_ev(body[c].method, 'dblclick'), row, r, c, k)">
-								<span v-if="action.r === r && action.c === c">
+            <span v-if="check_ev(body[c].method, 'click')" 
+            @click="click(check_ev(body[c].method, 'click'), row, r, c, k)">
+              {{ item }}
+            </span>
 
-									<slot v-if="check_slot(body[c].method)" 
-									:name="check_slot(body[c].method)"
-									:row="row" :r="r" :c="c" :k="k"></slot>
+            <span v-else-if="check_ev(body[c].method, 'dblclick')"
+            @dblclick="dblclick(check_ev(body[c].method, 'dblclick'), row, r, c, k)">
+              <span v-if="action.r === r && action.c === c">
 
-									<span v-else>Can't find <b>Slot</b></span>
+                <slot v-if="check_slot(body[c].method)" 
+                :name="check_slot(body[c].method)"
+                :row="row" :r="r" :c="c" :k="k"></slot>
 
-								</span>
+                <span v-else>Can't find <b>Slot</b></span>
 
-								<span v-else>{{ item }}</span>
-							</span>
+              </span>
 
-							<span v-else-if="check_ev(body[c].method, 'hover')"
-							@mouseover="hover(check_ev(body[c].method, 'hover'), row, r, c, k)">
-								{{ item }}
-							</span>
+              <span v-else>{{ item }}</span>
+            </span>
 
-						</div>
+            <span v-else-if="check_ev(body[c].method, 'hover')"
+            @mouseover="hover(check_ev(body[c].method, 'hover'), row, r, c, k)">
+              {{ item }}
+            </span>
 
-						<div v-else>
-							<span v-if="config.checkbox && k == 'id' && c === 0">
-								<input type="checkbox" :value="item" v-model="checkbox">
-							</span>
-							<span v-else>{{ item }}</span>
-						</div>
+          </div>
 
-					</td>
+          <div v-else>
+            <span v-if="config.checkbox && k == 'id' && c === 0">
+              <input type="checkbox" :value="item" v-model="checkbox">
+            </span>
+            <span v-else>{{ item }}</span>
+          </div>
 
-				</tr>
+        </td>
 
-				<tr v-else class="tr-active">
-					<td :colspan="header.length">
-						<slot name="edit_row" :row="find_by_id(toggle_edit_row)"></slot>
-					</td>
-				</tr>
-			</tbody>
+      </tr>
 
-		</table>
+      <tr v-else class="tr-active">
+        <td :colspan="header.length">
+          <slot name="edit_row" :row="find_by_id(toggle_edit_row)"></slot>
+        </td>
+      </tr>
+    </tbody>
 
-		<context-menu v-if="config.edit_row" id="context-menu" ref="ctxMenu"
-		@ctx-open="onCtxOpen" @ctx-cancel="resetCtxLocals" @ctx-close="onCtxClose">
-		  <li @click.prevent="set_edit_row">Edit</li>
-		  <li @click.prevent="remove_row">Delete</li>
-		  <li>Not yet</li>
-		</context-menu>
+  </table>
 
-		<context-menu v-else style="display: none" id="context-menu" ref="ctxMenu"></context-menu>
-	</div>
+  <context-menu v-if="config.edit_row" id="context-menu" ref="ctxMenu"
+  @ctx-open="onCtxOpen" @ctx-cancel="resetCtxLocals" @ctx-close="onCtxClose">
+    <li @click.prevent="set_edit_row">Edit</li>
+    <li @click.prevent="remove_row">Delete</li>
+    <li>Not yet</li>
+  </context-menu>
+
+  <context-menu v-else style="display: none" id="context-menu" ref="ctxMenu"></context-menu>
+</div>
 </template>
 
 <style>
-	.tr-active {
-		border-left: 1px solid #1a2226;
-	}
+.tr-active {
+  border-left: 1px solid #1a2226;
+}
 
-	.ctx-menu { font-size: 1em !important; }
-	#context-menu li {
-		padding: 3px 20px;
-		font-size: .9em;
-		font-weight: 600;
-    line-height: 1.5;
-    cursor: context-menu;
-	}
-	#context-menu li:hover {
-		color: #2b2d2f;
-    text-decoration: none;
-    background-color: #f5f5f5;
-	}
+.ctx-menu { font-size: 1em !important; }
+#context-menu li {
+  padding: 3px 20px;
+  font-size: .9em;
+  font-weight: 600;
+  line-height: 1.5;
+  cursor: context-menu;
+}
+#context-menu li:hover {
+  color: #2b2d2f;
+  text-decoration: none;
+  background-color: #f5f5f5;
+}
 </style>
 
 <script>
@@ -106,107 +106,107 @@
 * Date: 04/14/2017
 * Github: https://github.com/cukikt0302/vue-simple-table
 **/
-	export default {
-		name: 'post-general',
+export default {
+  name: 'post-general',
 
-		props: {
-			checkbox_method: { default() { return '' } },
-			checkall_method: { default() { return '' } },
-			config: { default() { return false } },
-			header: { default() { return {} } },
-			body: { default() { return {} } },
-			action: { default() { return {} } },
-			data: { default() { return {} } }
-		},
+  props: {
+    checkbox_method: { default() { return '' } },
+    checkall_method: { default() { return '' } },
+    config: { default() { return false } },
+    header: { default() { return {} } },
+    body: { default() { return {} } },
+    action: { default() { return {} } },
+    data: { default() { return {} } }
+  },
 
-		data() {
-			return {
-				checkbox: [],
-				context_menu_row: '',
-				toggle_edit_row: false
-			}
-		},
+  data() {
+    return {
+      checkbox: [],
+      context_menu_row: '',
+      toggle_edit_row: false
+    }
+  },
 
-		computed: {
-      checkall: {
-        get: function () {
-          return this.data 
-          	? this.checkbox.length == this.data.length 
-          	: false;
-        },
-        set: function (value) {
-          var checkbox = [];
+  computed: {
+    checkall: {
+      get: function () {
+        return this.data 
+          ? this.checkbox.length == this.data.length 
+          : false;
+      },
+      set: function (value) {
+        var checkbox = [];
 
-          if (value) {
-            this.data.forEach(function (item) {
-              checkbox.push(item.id);
-            });
-          }
-
-          this.checkbox = checkbox;
+        if (value) {
+          this.data.forEach(function (item) {
+            checkbox.push(item.id);
+          });
         }
+
+        this.checkbox = checkbox;
+      }
+    }
+  },
+
+  watch: {
+    'checkbox': function(newVal) {
+      this.$emit(this.checkbox_method, newVal)
+    }
+  },
+
+  methods: {
+    has_ev(item) {
+      if (item['click'] != undefined) {
+        return true;
+      } else if (item['dblclick'] != undefined) {
+        return true;
+      } else if (item['hover'] != undefined) {
+        return true;
+      } else {
+        return false;
       }
     },
 
-		watch: {
-			'checkbox': function(newVal) {
-				this.$emit(this.checkbox_method, newVal)
-			}
-		},
+    check_ev(item, str) {
+      return Object.keys(item)[0] == str 
+        ? item[Object.keys(item)[0]]
+        : false;
+    },
 
-		methods: {
-			has_ev(item) {
-				if (item['click'] != undefined) {
-					return true;
-				} else if (item['dblclick'] != undefined) {
-					return true;
-				} else if (item['hover'] != undefined) {
-					return true;
-				} else {
-					return false;
-				}
-			},
+    check_slot(item) {
+      return Object.keys(item)[1] == 'slot' 
+        ? item[Object.keys(item)[1]]
+        : false;
+    },
 
-			check_ev(item, str) {
-				return Object.keys(item)[0] == str 
-					? item[Object.keys(item)[0]]
-					: false;
-			},
+    click(Emit, row, r, c, k) { this.$emit(Emit, row, r, c, k); },
+    dblclick(Emit, row, r, c, k) { this.$emit(Emit, row, r, c, k); },
+    hover(Emit, row, r, c, k) { this.$emit(Emit, row, r, c, k); },
 
-			check_slot(item) {
-				return Object.keys(item)[1] == 'slot' 
-					? item[Object.keys(item)[1]]
-					: false;
-			},
+    onCtxOpen(row) { this.context_menu_row = row },
+    onCtxClose(row) { },
+    resetCtxLocals(row) { this.context_menu_row = {} },
 
-			click(Emit, row, r, c, k) { this.$emit(Emit, row, r, c, k); },
-			dblclick(Emit, row, r, c, k) { this.$emit(Emit, row, r, c, k); },
-			hover(Emit, row, r, c, k) { this.$emit(Emit, row, r, c, k); },
+    set_edit_row() {// context_menu_row when right click context menu onCtxOpen()
+      this.toggle_edit_row = this.context_menu_row.id
+    },
 
-			onCtxOpen(row) { this.context_menu_row = row },
-      onCtxClose(row) { },
-      resetCtxLocals(row) { this.context_menu_row = {} },
+    cancel_edit_row() { 
+      this.toggle_edit_row = false
+      this.context_menu_row = {}
+    },
 
-      set_edit_row() {// context_menu_row when right click context menu onCtxOpen()
-      	this.toggle_edit_row = this.context_menu_row.id
-      },
+    remove_row() {
+      let index = this.data.indexOf(this.context_menu_row)
+      if (confirm(`Are you sure remove row: ${index + 1}`))
+      this.data.splice(index, 1)
+    },
 
-      cancel_edit_row() { 
-      	this.toggle_edit_row = false
-      	this.context_menu_row = {}
-      },
+    find_by_id(id) { return this.data.find(obj => obj.id === id) }
+  },
 
-      remove_row() {
-      	let index = this.data.indexOf(this.context_menu_row)
-      	if (confirm(`Are you sure remove row: ${index + 1}`))
-      	this.data.splice(index, 1)
-      },
-
-      find_by_id(id) { return this.data.find(obj => obj.id === id) }
-		},
-
-		components: {
-			'context-menu': require('vue-context-menu')
-		}
-	}
+  components: {
+    'context-menu': require('vue-context-menu')
+  }
+}
 </script>
