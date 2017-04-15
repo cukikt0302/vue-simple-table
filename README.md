@@ -89,99 +89,99 @@ FULL example
 </div>
 
 <script>
-	export default {
-		name: 'post-general',
-		data() {
-			return {
-				header: [
-					{ title: 'ID', class: 'text-center' },
-					{ title: 'Title' },
-					{ title: 'Category' },
-					{ title: 'Create', class: 'text-center' },
-					{ title: 'Author' }
-				],
-				body: [
-					{ class: 'text-center' },
-					{ method: {dblclick: 'edit', slot: 'textarea'}  },
-					{ method: {dblclick: 'edit', slot: 'select'} },
-				 	{ class: 'text-center', method: {dblclick: 'edit', slot: 'input'} },
-					{ method: {dblclick: 'edit', slot: 'input'} }
-				],
-				data: [
-					{
-						id: 1,
-						title: 'Lorem ipsum dolor sit amet',
-						category: 'Internet',
-						create: '03/02/2017',
-						author: 'administrator'
-					},
-					{
-						id: 2,
-						title: 'Esse explicabo, beatae accusantium odit ipsa velit atque',
-						category: 'Cooking',
-						create: '15/09/2017',
-						author: 'moderator'
-					},
-					{
-						id: 3,
-						title: 'Lorem ipsum dolor sit amet',
-						category: 'Default',
-						create: '01/04/2014',
-						author: 'guest'
-					},
-					{
-						id: 4,
-						title: 'Esse explicabo, beatae accusantium odit ipsa velit atque',
-						category: 'Internet',
-						create: '28/11/1986',
-						author: 'alibaba'
-					}
-				],
-				action: {
-					r: false,// row index
-					c: false,// col index
-					edit_value: '',// v-model for all edit model
-					checkbox: [],
-					edit_row: {// value from edit_row my-table component
-						title: '',
-						category: '',
-						create: '',
-						author: ''
-					}
-				}
-			}
-		},
-		methods: {
-			edit(row, r, c, k) {
-				this.action.r = r;
-				this.action.c = c;
-				this.action.edit_value = row[k];
-			},
-			submit(res) {
-				if (res.row[res.k] != this.action.edit_value)
+export default {
+	name: 'post-general',
+	data() {
+		return {
+			header: [
+				{ title: 'ID', class: 'text-center' },
+				{ title: 'Title' },
+				{ title: 'Category' },
+				{ title: 'Create', class: 'text-center' },
+				{ title: 'Author' }
+			],
+			body: [
+				{ class: 'text-center' },
+				{ method: {dblclick: 'edit', slot: 'textarea'}  },
+				{ method: {dblclick: 'edit', slot: 'select'} },
+				{ class: 'text-center', method: {dblclick: 'edit', slot: 'input'} },
+				{ method: {dblclick: 'edit', slot: 'input'} }
+			],
+			data: [
 				{
-					res.row[res.k] = this.action.edit_value;
+					id: 1,
+					title: 'Lorem ipsum dolor sit amet',
+					category: 'Internet',
+					create: '03/02/2017',
+					author: 'administrator'
+				},
+				{
+					id: 2,
+					title: 'Esse explicabo, beatae accusantium odit ipsa velit atque',
+					category: 'Cooking',
+					create: '15/09/2017',
+					author: 'moderator'
+				},
+				{
+					id: 3,
+					title: 'Lorem ipsum dolor sit amet',
+					category: 'Default',
+					create: '01/04/2014',
+					author: 'guest'
+				},
+				{
+					id: 4,
+					title: 'Esse explicabo, beatae accusantium odit ipsa velit atque',
+					category: 'Internet',
+					create: '28/11/1986',
+					author: 'alibaba'
 				}
-				this.action.r = false;
-				this.action.c = false;
-			},
-			reset_edit(res) {
-				this.action.r = false;
-				this.action.c = false;
-			},
-			check_ev(item, str) {
-				return Object.keys(item)[0] == str 
-					? item[Object.keys(item)]
-					: false;
-			},
-			set_checkbox(item) {
-				this.action.checkbox = item
+			],
+			action: {
+				r: false,// row index
+				c: false,// col index
+				edit_value: '',// v-model for all edit model
+				checkbox: [],
+				edit_row: {// value from edit_row my-table component
+					title: '',
+					category: '',
+					create: '',
+					author: ''
+				}
 			}
-		},
-		components: {
-			'my-table': require('table.vue')
 		}
+	},
+	methods: {
+		edit(row, r, c, k) {
+			this.action.r = r;
+			this.action.c = c;
+			this.action.edit_value = row[k];
+		},
+		submit(res) {
+			if (res.row[res.k] != this.action.edit_value)
+			{
+				res.row[res.k] = this.action.edit_value;
+			}
+			this.action.r = false;
+			this.action.c = false;
+		},
+		reset_edit(res) {
+			this.action.r = false;
+			this.action.c = false;
+		},
+		check_ev(item, str) {
+			return Object.keys(item)[0] == str 
+				? item[Object.keys(item)]
+				: false;
+		},
+		set_checkbox(item) {
+			this.action.checkbox = item
+		}
+	},
+	components: {
+		'my-table': require('table.vue')
 	}
+}
 </script>
 
 ```
