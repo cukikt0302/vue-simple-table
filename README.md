@@ -25,7 +25,7 @@ FULL example
         <div class="col-md-6">
           <div class="form-group">
             <label for="title">Title</label>
-            <input type="text" class="form-control input-sm" v-focus 
+            <input type="text" class="form-control input-sm" 
             id="title" placeholder="Title" :value="res.row.title">
           </div>
 
@@ -62,13 +62,13 @@ FULL example
     <!-- slot for edit row -->
 
     <template slot="input" scope="res">
-      <input type="text" v-focus v-selected v-model="action.edit_value"
+      <input type="text" v-model="action.edit_value"
       class="input-sm form-control" @blur="reset_edit(res)" 
       @keydown.enter="submit(res)" @keydown.esc="reset_edit(res)">
     </template>
 
     <template slot="select" scope="res">
-      <select v-focus class="input-sm form-control" 
+      <select class="input-sm form-control" 
       v-model="action.edit_value" @blur="submit(res)"
       @keydown.enter="submit(res)" @keydown.esc="reset_edit(res)">
         <option :value="'Default'">Default</option>
@@ -78,7 +78,7 @@ FULL example
     </template>
 
     <template slot="textarea" scope="res">
-      <textarea rows="1" v-focus class="input-sm form-control" 
+      <textarea rows="1" class="input-sm form-control" 
       @blur="reset_edit(res)" @keydown.enter="submit(res)"
       @keydown.esc="reset_edit(res)" v-model="action.edit_value"></textarea>
     </template>
