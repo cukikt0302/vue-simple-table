@@ -1,7 +1,7 @@
-# vue-simple-table
+# vue-simple-table Vue2+
 simple table inline edit
 
-Contain component
+Contain other component:
 https://github.com/vmaimone/vue-context-menu
 
 > full example in general.vue
