@@ -5,43 +5,51 @@
 				<div class="box-body no-padding table-responsive">
 					<my-table ref="my_table"
 						:header="header" :body="body" :data="data" :action="action"
-						:config="{table_class: 'table table-striped', checkbox: true, edit_row: true}" 
+						:config="{
+							table_class: 'table table-striped', 
+							checkbox: true, 
+							edit_row: true,
+							sort: true
+						}" 
 						@edit="edit" checkbox_method="set_checkbox" @set_checkbox="set_checkbox">
-						
-						<template slot="edit_row" scope="res">
-							<form @submit.prevent="" role="form" @keyup.esc="$refs.my_table.cancel_edit_row">
 
-								<div class="col-md-6">
+						<template slot="edit_row" scope="res">
+							<form @submit.prevent="submit_row(res.row)" role="form" 
+							@keyup.esc="$refs.my_table.cancel_edit_row">
+
+								<div class="col-md-4 col-md-offset-2">
 									<div class="form-group">
 										<label for="title">Title</label>
-										<input type="text" class="form-control input-sm" v-focus 
-										id="title" placeholder="Title" :value="res.row.title">
+										<input type="text" class="form-control input-sm" v-focus  id="title" 
+										placeholder="Title" v-model="action.edit_row.title = res.row.title">
 									</div>
-								
+
 									<div class="form-group">
-										<label for="def">Def</label>
-										<input type="text" class="form-control input-sm" 
-										id="def" placeholder="Input field">
+										<label for="create">Created</label>
+										<input type="text" class="form-control input-sm" id="create" 
+										placeholder="Created" v-model="action.edit_row.create = res.row.create">
 									</div>
 								</div>
-								<div class="col-md-6">
-									<div class="form-group">
-										<label for="gha">Gha</label>
-										<input type="text" class="form-control input-sm" 
-										id="gha" placeholder="Title">
-									</div>
-								
+								<div class="col-md-4">
+
 									<div class="form-group">
 										<label for="category">Category</label>
-										<select name="category" id="category" class="form-control input-sm">
-											<option value="Default">Default</option>
-											<option value="Internet">Internet</option>
-											<option value="Cooking">Cooking</option>
+										<select name="category" id="category" class="form-control input-sm" 
+										v-model="action.edit_row.category = res.row.category">
+											<option :value="'Default'">Default</option>
+											<option :value="'Internet'">Internet</option>
+											<option :value="'Cooking'">Cooking</option>
 										</select>
 									</div>
+
+									<div class="form-group">
+										<label for="author">Author</label>
+										<input type="text" class="form-control input-sm" id="author" placeholder="Author"
+										:value="res.row.author" v-model="action.edit_row.author = res.row.author">
+									</div>
 								</div>
-							
-								<div class="col-md-12">
+
+								<div class="col-md-8 col-md-offset-2">
 									<button type="submit" class="btn btn-flat btn-sm btn-primary">Submit</button>
 									<button type="button" class="btn btn-flat btn-sm btn-default" 
 									@click.prevent="$refs.my_table.cancel_edit_row()">Cancel</button>
@@ -73,7 +81,9 @@
 
 					</my-table>
 
-					<pre>{{ $data.action }}</pre>
+					<div class="col-md-12">
+						<pre>{{ action }}</pre>
+					</div>
 
 				</div>
 			</div>
@@ -81,26 +91,34 @@
 	</div>
 </template>
 
-<script>
+<style>
+	.cursor-pointer { cursor: pointer; }
+</style>
 
+<script>
+/*
+ * create: Nguyen Ke Nhat
+ * Date: 04/14/2017
+ * Github: https://github.com/cukikt0302/vue-simple-table
+*/
 	export default {
 		name: 'post-general',
 
 		data() {
 			return {
-				header: [
+				header: [// key: name of column for sort, not sort not set this
 					{ title: 'ID', class: 'text-center' },
-					{ title: 'Title' },
-					{ title: 'Category' },
-					{ title: 'Create', class: 'text-center' },
-					{ title: 'Author' }
+					{ title: 'Title', key: 'title', class: 'cursor-pointer'},
+					{ title: 'Category', key: 'category', class: 'cursor-pointer'},
+					{ title: 'Create', class: 'text-center'},
+					{ title: 'Author', key: 'author', class: 'cursor-pointer'}
 				],
 
 				body: [
 					{ class: 'text-center' },
 					{ method: {dblclick: 'edit', slot: 'textarea'}  },
 					{ method: {dblclick: 'edit', slot: 'select'} },
-				 	{ class: 'text-center', method: {dblclick: 'edit', slot: 'input'} },
+					{ class: 'text-center', method: {dblclick: 'edit', slot: 'input'} },
 					{ method: {dblclick: 'edit', slot: 'input'} }
 				],
 
@@ -130,7 +148,7 @@
 						id: 4,
 						title: 'Esse explicabo, beatae accusantium odit ipsa velit atque',
 						category: 'Internet',
-						create: '28/11/1986',
+						create: '28/11/2016',
 						author: 'alibaba'
 					}
 				],
@@ -140,7 +158,7 @@
 					c: false,// col index
 					edit_value: '',// v-model for all edit model
 					checkbox: [],
-					edit_row: {// value from edit_row my-table component
+					edit_row: {// value of edit_row in my-table component
 						title: '',
 						category: '',
 						create: '',
@@ -148,6 +166,13 @@
 					}
 				}
 			}
+		},
+
+		mounted() {
+			this.$store.commit('set_page_header', {
+				title: 'Post',
+				desc: 'General'
+			})
 		},
 
 		methods: {
@@ -159,15 +184,13 @@
 			},
 
 			submit(res) {
-				if (res.row[res.k] != this.action.edit_value)
-				{
+				if (res.row[res.k] != this.action.edit_value) {
 					res.row[res.k] = this.action.edit_value;
 				}
-				this.action.r = false;
-				this.action.c = false;
+				this.reset_edit()
 			},
 
-			reset_edit(res) {
+			reset_edit() {
 				this.action.r = false;
 				this.action.c = false;
 			},
@@ -178,14 +201,20 @@
 					: false;
 			},
 
-			set_checkbox(item) {
-				this.action.checkbox = item
+			set_checkbox(item) { this.action.checkbox = item },
+
+			submit_row(row) {
+				for (let item in this.action.edit_row) {
+					row[item] = this.action.edit_row[item]
+				}
+				// console.log(row, this.action.edit_row)
+				this.$refs.my_table.cancel_edit_row(true)
 			}
 
 		},
 
 		components: {
-			'my-table': require('table.vue')
+			'my-table': require('../../general/table.vue')
 		}
 	}
 </script>
