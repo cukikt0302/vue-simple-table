@@ -156,10 +156,7 @@
 
 		methods: {
 			has_ev(item) {
-				if (item['click'] != undefined)
-				{
-					return true;
-				} else if (item['click'] != undefined) {
+				if (item['click'] != undefined) {
 					return true;
 				} else if (item['dblclick'] != undefined) {
 					return true;
