@@ -135,7 +135,7 @@ export default {
           id: 4,
           title: 'Esse explicabo, beatae accusantium odit ipsa velit atque',
           category: 'Internet',
-          create: '28/11/1986',
+          create: '28/11/2016',
           author: 'alibaba'
         }
       ],
@@ -144,7 +144,7 @@ export default {
         c: false,// col index
         edit_value: '',// v-model for all edit model
         checkbox: [],
-        edit_row: {// value from edit_row my-table component
+        edit_row: {// value of edit_row my-table component
           title: '',
           category: '',
           create: '',
@@ -160,12 +160,10 @@ export default {
       this.action.edit_value = row[k];
     },
     submit(res) {
-      if (res.row[res.k] != this.action.edit_value)
-      {
+      if (res.row[res.k] != this.action.edit_value) {
         res.row[res.k] = this.action.edit_value;
       }
-      this.action.r = false;
-      this.action.c = false;
+      this.reset_edit()
     },
     reset_edit(res) {
       this.action.r = false;
