@@ -11,6 +11,7 @@ Demo https://cukikt0302.github.io/vue-simple-table/index.html
 FULL example
 
 ```html
+<template>
 <div>
   <my-table ref="my_table"
     :header="header" :body="body" :data="data" :action="action"
@@ -87,6 +88,7 @@ FULL example
   <pre>{{ $data.action }}</pre>
 
 </div>
+</template>
 
 <script>
 export default {
@@ -183,5 +185,4 @@ export default {
 	}
 }
 </script>
-
 ```
