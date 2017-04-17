@@ -3,6 +3,7 @@
 		<div class="col-md-12">
 			<div class="box box-primary">
 				<div class="box-body no-padding table-responsive">
+					
 					<my-table ref="my_table"
 						:header="header" :body="body" :data="data" :action="action"
 						:config="{
@@ -11,8 +12,8 @@
 							edit_row: true,
 							sort: true
 						}" 
-						@edit="edit" checkbox_method="set_checkbox" @set_checkbox="set_checkbox">
-
+						@edit="edit" @set_checkbox="set_checkbox">
+						
 						<template slot="edit_row" scope="res">
 							<form @submit.prevent="submit_row(res.row)" role="form" 
 							@keyup.esc="$refs.my_table.cancel_edit_row">
@@ -23,7 +24,7 @@
 										<input type="text" class="form-control input-sm" v-focus  id="title" 
 										placeholder="Title" v-model="action.edit_row.title = res.row.title">
 									</div>
-
+								
 									<div class="form-group">
 										<label for="create">Created</label>
 										<input type="text" class="form-control input-sm" id="create" 
@@ -31,7 +32,7 @@
 									</div>
 								</div>
 								<div class="col-md-4">
-
+								
 									<div class="form-group">
 										<label for="category">Category</label>
 										<select name="category" id="category" class="form-control input-sm" 
@@ -48,7 +49,7 @@
 										:value="res.row.author" v-model="action.edit_row.author = res.row.author">
 									</div>
 								</div>
-
+							
 								<div class="col-md-8 col-md-offset-2">
 									<button type="submit" class="btn btn-flat btn-sm btn-primary">Submit</button>
 									<button type="button" class="btn btn-flat btn-sm btn-default" 
@@ -81,6 +82,15 @@
 
 					</my-table>
 
+					<div class="col-md-12 text-right">
+						<my-pagi :total_page="5" :per_page="2" @current_page="current_page">
+							<span slot="nextPage">&rsaquo;</span>
+							<span slot="prevPage">&lsaquo;</span>
+							<span slot="firstPage">&laquo;</span>
+							<span slot="lastPage">&raquo; 5</span>
+						</my-pagi>
+					</div>
+
 					<div class="col-md-12">
 						<pre>{{ action }}</pre>
 					</div>
@@ -110,7 +120,7 @@
 					{ title: 'ID', class: 'text-center' },
 					{ title: 'Title', key: 'title', class: 'cursor-pointer'},
 					{ title: 'Category', key: 'category', class: 'cursor-pointer'},
-					{ title: 'Create', class: 'text-center'},
+					{ title: 'Create', key: 'create', class: 'text-center cursor-pointer'},
 					{ title: 'Author', key: 'author', class: 'cursor-pointer'}
 				],
 
@@ -118,7 +128,7 @@
 					{ class: 'text-center' },
 					{ method: {dblclick: 'edit', slot: 'textarea'}  },
 					{ method: {dblclick: 'edit', slot: 'select'} },
-					{ class: 'text-center', method: {dblclick: 'edit', slot: 'input'} },
+				 	{ class: 'text-center', method: {dblclick: 'edit', slot: 'input'} },
 					{ method: {dblclick: 'edit', slot: 'input'} }
 				],
 
@@ -127,28 +137,28 @@
 						id: 1,
 						title: 'Lorem ipsum dolor sit amet',
 						category: 'Internet',
-						create: '03/02/2017',
+						create: '2017-02-03',
 						author: 'administrator'
 					},
 					{
 						id: 2,
 						title: 'Esse explicabo, beatae accusantium odit ipsa velit atque',
 						category: 'Cooking',
-						create: '15/09/2017',
+						create: '2017-09-15',
 						author: 'moderator'
 					},
 					{
 						id: 3,
 						title: 'Lorem ipsum dolor sit amet',
 						category: 'Default',
-						create: '01/04/2014',
+						create: '2016-11-21',
 						author: 'guest'
 					},
 					{
 						id: 4,
 						title: 'Esse explicabo, beatae accusantium odit ipsa velit atque',
 						category: 'Internet',
-						create: '28/11/2016',
+						create: '2016-11-29',
 						author: 'alibaba'
 					}
 				],
@@ -163,6 +173,9 @@
 						category: '',
 						create: '',
 						author: ''
+					},
+					pagination: {
+						current_page: 1
 					}
 				}
 			}
@@ -170,9 +183,9 @@
 
 		mounted() {
 			this.$store.commit('set_page_header', {
-				title: 'Post',
-				desc: 'General'
-			})
+	      title: 'Post',
+	      desc: 'General'
+	    })
 		},
 
 		methods: {
@@ -195,26 +208,24 @@
 				this.action.c = false;
 			},
 
-			check_ev(item, str) {
-				return Object.keys(item)[0] == str 
-					? item[Object.keys(item)]
-					: false;
-			},
-
 			set_checkbox(item) { this.action.checkbox = item },
 
 			submit_row(row) {
 				for (let item in this.action.edit_row) {
 					row[item] = this.action.edit_row[item]
 				}
-				// console.log(row, this.action.edit_row)
 				this.$refs.my_table.cancel_edit_row(true)
+			},
+
+			current_page(num) {
+				this.action.pagination.current_page = num
 			}
 
 		},
 
 		components: {
-			'my-table': require('../../general/table.vue')
+			'my-table': require('../../general/table.vue'),
+			'my-pagi': require('../../general/pagination.vue')
 		}
 	}
 </script>
