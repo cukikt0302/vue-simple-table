@@ -12,18 +12,30 @@
 			<li :disabled="!showPrev" :class="{'disabled' : !showPrev}">
 				<a @click.prevent="prevPage" href="#">
 					<slot v-if="$slots.prevPage" name="prevPage"></slot>
-					<span v-else>Prev</span>
+					<span v-else>{{ current_page - 1}}</span>
 				</a>
 			</li>
 
-			<li class="active" :class="current">
-				<span>{{ current_page }}</span>
+			<li class="active" :class="current" @click="set_toggle_input()">
+				<span style="position: relative;">{{ current_page }}</span>
+				<div v-if="toggle_input" :style="`position: absolute; ${placement}: -10px;`">
+					
+					<form @submit.prevent="change_current_page()">
+						<input type="number" v-focus v-selected 
+							@blur="toggle_input = false" @keydown.esc="toggle_input = false"
+							style="width: 80px; display: inline-block;" 
+							required min="1" :max="total_page"
+							:value="current_page" v-model.number="input_value">
+							<small style="color: auto;">Max: {{ total_page }}</small>
+					</form>
+
+				</div>
 			</li>
 
 			<li :disabled="!showNext" :class="{'disabled' : !showNext}">
 				<a @click.prevent="nextPage" href="#">
 					<slot v-if="$slots.nextPage" name="nextPage"></slot>
-					<span v-else>Next</span>
+					<span v-else>{{ current_page + 1}}</span>
 				</a>
 			</li>
 
@@ -38,15 +50,14 @@
 	</div>
 </template>
 
-<style>
-	
-</style>
-
 <script>
 export default {
 	name: 'pagination',
 	
 	props: {
+		placement: {// top or bottom
+			default() { return 'bottom' }
+		},
 		ul_class: {
 			default() { return 'pagination pagination-sm' }
 		},
@@ -63,7 +74,9 @@ export default {
 
 	data() {
 		return {
-			current_page: 1
+			current_page: 1,
+			toggle_input: false,
+			input_value: ''
 		}
 	},
 
@@ -104,6 +117,17 @@ export default {
 		lastPage() {
 			if (this.showLast)
 				this.current_page = this.total_page
+		},
+
+		set_toggle_input() {
+			this.input_value = this.current_page
+			this.toggle_input = !this.toggle_input
+		},
+
+		change_current_page() {
+			this.toggle_input = false
+			if (this.current_page !== this.input_value)
+			this.current_page = this.input_value
 		}
 	},
 
