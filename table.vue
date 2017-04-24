@@ -5,9 +5,10 @@
     <thead>
       <tr>
         <th class="text-capitalize" v-for="(thead, index) in header" 
-        :class="thead.class" @click="sort_colum(thead)">
+        :class="thead.class" @click="sort_colum(thead)" 
+        v-show="hidden_column.indexOf(index) === -1">
 
-          <span v-if="config.checkbox && index === 0">
+          <span v-if="config.checkbox && index === 0 && !toggle_edit_row">
             <input type="checkbox" v-model="checkall">
           </span>
 
@@ -20,6 +21,8 @@
           </span>
 
         </th>
+
+        <th></th>
       </tr>
     </thead>
 
@@ -28,18 +31,22 @@
       @contextmenu.prevent="$refs.ctxMenu.open($event, row)"
       v-if="row.id !== toggle_edit_row">
 
-        <td v-for="(item, k, c) in row" :key="item.id" :class="body[c].class">
+        <td v-for="(item, k, c) in row" :key="item.id" 
+          :class="body[c] && body[c].class" v-show="hidden_column.indexOf(c) === -1">
 
-          <div v-if="body[c].hasOwnProperty('method') && has_ev(body[c].method)">
+          <div v-if="body[c] && body[c].hasOwnProperty('method') && has_ev(body[c].method) && !toggle_edit_row">
 
+            <!-- Click -->
             <span v-if="check_ev(body[c].method, 'click')" 
             @click="click(check_ev(body[c].method, 'click'), row, r, c, k)">
               {{ item }}
             </span>
+            <!-- Click -->
 
+            <!-- Dblclick -->
             <span v-else-if="check_ev(body[c].method, 'dblclick')"
             @dblclick="dblclick(check_ev(body[c].method, 'dblclick'), row, r, c, k)">
-              <span v-if="action.r === r && action.c === c">
+              <span v-if="v === r && h === c">
 
                 <slot v-if="check_slot(body[c].method)" 
                 :name="check_slot(body[c].method)"
@@ -51,21 +58,32 @@
 
               <span v-else>{{ item }}</span>
             </span>
+            <!-- Dblclick -->
 
+            <!-- Hover -->
             <span v-else-if="check_ev(body[c].method, 'hover')"
             @mouseover="hover(check_ev(body[c].method, 'hover'), row, r, c, k)">
               {{ item }}
             </span>
+            <!-- Hover -->
 
           </div>
 
           <div v-else>
-            <span v-if="config.checkbox && k == 'id' && c === 0">
+            <span v-if="config.checkbox && k == 'id' && c === 0 && !toggle_edit_row">
               <input type="checkbox" :value="item" v-model="checkbox">
             </span>
             <span v-else>{{ item }}</span>
           </div>
 
+        </td>
+
+        <td>
+          <tooltip text="Undo row" v-show="row_undo && row_undo === row.id">
+            <button class="btn btn-xs btn-info" @click.prevent="set_data_undo(r)">
+              <span class="fa fa-undo"></span>
+            </button>
+          </tooltip>
         </td>
 
       </tr>
@@ -81,8 +99,13 @@
 
   <context-menu v-if="config.edit_row" id="context-menu" ref="ctxMenu"
   @ctx-open="onCtxOpen" @ctx-cancel="resetCtxLocals" @ctx-close="onCtxClose">
-    <li @click.prevent="set_edit_row">Edit</li>
-    <li @click.prevent="remove_row">Delete</li>
+    <li @click.prevent="set_edit_row">
+      <i class="fa fa-wrench"></i> <span>{{ contextmenu_edit_text }}</span>
+    </li>
+    <li @click.prevent="remove_row">
+      <i class="fa fa-remove"></i> <span>{{ contextmenu_remove_text }}</span>
+    </li>
+    <slot name="list_context" :row="context_menu_row"></slot>
   </context-menu>
 
   <context-menu v-else style="display: none" id="context-menu" ref="ctxMenu"></context-menu>
@@ -90,16 +113,18 @@
 </template>
 
 <style>
-  .tr-active { border-left: 1px solid #1a2226; }
-  .ctx-menu { font-size: 1em !important; }
+  .tr-active { background-color: #f5f5f5; }
+  .ctx-menu { font-size: 1em !important; min-width: 200px !important; }
   #context-menu li {
-    padding: 3px 20px;
+    padding: 5px 10px;
     font-size: .9em;
     font-weight: 600;
     line-height: 1.5;
     cursor: context-menu;
   }
-  #context-menu li:hover {
+  #context-menu li:not(:last-child) { border-bottom: 1px dotted #e3e3e3; }
+  #context-menu li > i.fa { padding: 0 5px; }
+  #context-menu li:hover { 
     color: #2b2d2f;
     text-decoration: none;
     background-color: #f5f5f5;
@@ -107,24 +132,32 @@
 </style>
 
 <script>
+import { Tooltip } from 'uiv'
+
 export default {
-  name: 'post-general',
+  name: 'vue-simple-table',
 
   props: {
     config: { default() { return false } },
     header: { default() { return {} } },
     body: { default() { return {} } },
-    action: { default() { return {} } },
-    data: { default() { return {} } }
+    h: { default() { return false } },
+    v: { default() { return false } },
+    data: { default() { return {} } },
+    contextmenu_edit_text: { default() { return 'Edit' } },
+    contextmenu_remove_text: { default() { return 'Remove' } },
+    hidden_column: { default() { return [] } }
   },
 
   data() {
     return {
       checkbox: [],
-      context_menu_row: '',
+      context_menu_row: false,
       toggle_edit_row: false,
       toggle_sort: -1,
-      column_sort: ''
+      column_sort: '',
+      row_undo: false,
+      data_undo: false
     }
   },
 
@@ -156,11 +189,16 @@ export default {
 
   methods: {
     sort_colum(item) {
-      if ( !this.config.sort || !item.hasOwnProperty('key')) return
+      if ( !this.config.sort || !item.hasOwnProperty('key') || this.toggle_edit_row) return
+      if (item.key == 'id' && this.config.checkbox) return
       this.toggle_sort = -(1) * this.toggle_sort
       this.column_sort = item.key
       this.data.sort((a, b) => {
-        let nameA = a[item.key].toLowerCase(), nameB = b[item.key].toLowerCase()
+        if (typeof a[item.key] == 'string' && typeof b[item.key] == 'string') {
+          var nameA = a[item.key].toLowerCase(), nameB = b[item.key].toLowerCase()
+        } else {
+          var nameA = a[item.key], nameB = b[item.key]
+        }
         return (nameA == nameB ? 0 : nameA < nameB ? -1 : 1) * (this.toggle_sort)
       })
     },
@@ -191,15 +229,27 @@ export default {
 
     onCtxOpen(row) { this.context_menu_row = row },
     onCtxClose(row) {},
-    resetCtxLocals(row) { this.context_menu_row = {} },
+    resetCtxLocals(row) { this.context_menu_row = false },
 
     set_edit_row() {// context_menu_row when right click context menu onCtxOpen()
       this.toggle_edit_row = this.context_menu_row.id
+      this.$emit('edit_row', this.context_menu_row)
     },
 
     cancel_edit_row(clearContext) { 
       this.toggle_edit_row = false
-      if ( !clearContext) this.context_menu_row = {}
+      if ( !clearContext) this.context_menu_row = false
+    },
+
+    set_row_undo(row) {
+      this.data_undo = row
+      this.row_undo = row.id || false
+    },
+
+    set_data_undo(index) {
+      this.$set(this.data, index, this.data_undo)
+      this.data_undo = false
+      this.row_undo = false
     },
 
     remove_row() {
@@ -224,7 +274,7 @@ export default {
             )}`;
         if (confirm(confirmStr)) { this.data.splice(index, 1) }
       }
-      this.context_menu_row = {}
+      this.context_menu_row = false
       this.checkbox = []
     },
 
@@ -232,7 +282,8 @@ export default {
   },
 
   components: {
-    'context-menu': require('vue-context-menu')
+    'context-menu': require('vue-context-menu'),
+    Tooltip
   }
 }
 </script>
