@@ -2,8 +2,9 @@
 <div>
   <table :class="config.table_class">
 
-    <thead>
+    <thead :class="config.head_class">
       <tr>
+        <th class="text-center" v-show="config.show_increment">Icrement</th>
         <th class="text-capitalize" v-for="(thead, index) in header" 
         :class="thead.class" @click="sort_colum(thead)" 
         v-show="hidden_column.indexOf(index) === -1">
@@ -26,10 +27,12 @@
       </tr>
     </thead>
 
-    <tbody>
+    <tbody :class="config.body_class">
       <tr v-for="(row, r) in data" :class="{'tr-active': context_menu_row.id === row.id}"
       @contextmenu.prevent="$refs.ctxMenu.open($event, row)"
       v-if="row.id !== toggle_edit_row">
+
+        <td class="text-center" v-show="config.show_increment">{{ r+1 }}</td>
 
         <td v-for="(item, k, c) in row" :key="item.id" 
           :class="body[c] && body[c].class" v-show="hidden_column.indexOf(c) === -1">
@@ -67,6 +70,14 @@
             </span>
             <!-- Hover -->
 
+            <span>
+              <tooltip text="Undo" v-show="row_undo && row_undo === row.id && uv === c">
+                <button class="btn btn-xs btn-info" @click.prevent="set_data_row_undo(r)">
+                  <span class="fa fa-undo"></span>
+                </button>
+              </tooltip>
+            </span>
+
           </div>
 
           <div v-else>
@@ -79,8 +90,8 @@
         </td>
 
         <td>
-          <tooltip text="Undo row" v-show="row_undo && row_undo === row.id">
-            <button class="btn btn-xs btn-info" @click.prevent="set_data_undo(r)">
+          <tooltip text="Undo" v-show="row_undo && row_undo === row.id && uv === false">
+            <button class="btn btn-xs btn-info" @click.prevent="set_data_row_undo(r)">
               <span class="fa fa-undo"></span>
             </button>
           </tooltip>
@@ -89,7 +100,7 @@
       </tr>
 
       <tr v-else class="tr-active">
-        <td :colspan="header.length">
+        <td :colspan="header.length + 1">
           <slot name="edit_row" :row="find_by_id(toggle_edit_row)"></slot>
         </td>
       </tr>
@@ -157,7 +168,8 @@ export default {
       toggle_sort: -1,
       column_sort: '',
       row_undo: false,
-      data_undo: false
+      data_row_undo: false,
+      uv: false// undo v
     }
   },
 
@@ -203,6 +215,7 @@ export default {
       })
     },
 
+    // Event
     has_ev(item) {
       if (item['click'] != undefined) {
         return true;
@@ -226,6 +239,7 @@ export default {
     click(Emit, row, r, c, k) { this.$emit(Emit, row, r, c, k) },
     dblclick(Emit, row, r, c, k) { this.$emit(Emit, row, r, c, k) },
     hover(Emit, row, r, c, k) { this.$emit(Emit, row, r, c, k) },
+    // Event
 
     onCtxOpen(row) { this.context_menu_row = row },
     onCtxClose(row) {},
@@ -241,14 +255,19 @@ export default {
       if ( !clearContext) this.context_menu_row = false
     },
 
-    set_row_undo(row) {
-      this.data_undo = row
+    set_row_undo(row, v) {
+      this.data_row_undo = row
       this.row_undo = row.id || false
+      if (v != undefined) {
+        this.uv = v
+      } else {
+        this.uv = false
+      }
     },
 
-    set_data_undo(index) {
-      this.$set(this.data, index, this.data_undo)
-      this.data_undo = false
+    set_data_row_undo(index) {
+      this.$set(this.data, index, this.data_row_undo)
+      this.data_row_undo = false
       this.row_undo = false
     },
 
