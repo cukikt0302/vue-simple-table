@@ -124,7 +124,7 @@
 </template>
 
 <style>
-  .tr-active { background-color: #f5f5f5; }
+  .tr-active { background-color: rgba(148, 149, 158, 0.38) !important; }
   .ctx-menu { font-size: 1em !important; min-width: 200px !important; }
   #context-menu li {
     padding: 5px 10px;
@@ -272,6 +272,7 @@ export default {
     },
 
     remove_row() {
+      let remove_id = []
       if (this.checkbox.length > 0) {
         if (confirm(
           `Remove ${this.checkbox.length} ${(
@@ -280,6 +281,7 @@ export default {
         )) {
           for (let i = this.checkbox.length -1; i >= 0; i--) {
             let obj = this.data.filter(ob => ob.id === this.checkbox[i])[0]
+            remove_id.push(i)
             this.data.splice(this.data.indexOf(obj), 1)
           }
         }
@@ -291,10 +293,12 @@ export default {
                 : index + 1 === 3 ? '3 RD' 
                 : (index + 1) + ' TH'
             )}`;
+        remove_id.push(index)
         if (confirm(confirmStr)) { this.data.splice(index, 1) }
       }
       this.context_menu_row = false
       this.checkbox = []
+      this.$emit('remove_row', remove_id)
     },
 
     find_by_id(id) { return this.data.find(obj => obj.id === id) }
