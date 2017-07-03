@@ -313,10 +313,10 @@
     },
 
     mounted() {
-      this.$store.commit('set_page_header', {
-        title: 'Post',
-        desc: 'General'
-      })
+      //this.$store.commit('set_page_header', {
+      //  title: 'Post',
+      //  desc: 'General'
+      //})
 
       this.set_data()
     },
