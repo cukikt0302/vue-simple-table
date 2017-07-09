@@ -3,8 +3,7 @@ simple table inline edit
 
 Contain other component:
 https://github.com/vmaimone/vue-context-menu
-
-> full example in general.vue
+https://github.com/wxsms/uiv
 
 Demo & example https://cukikt0302.github.io/vue-simple-table/index.html
 
