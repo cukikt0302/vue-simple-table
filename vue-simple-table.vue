@@ -69,14 +69,16 @@
 							{{ item }}
 						</div>
 						<!-- Hover -->
-
+						
+						<!-- Under Cell -->
 						<span class="simple-table-undo">
-							<tooltip text="Undo" v-show="row_undo && row_undo === row.id && uv === c">
+							<tooltip text="Undo" v-show="row_undo && row_undo === row.id && uv === c && v !== r && h !== c">
 								<button class="btn btn-xs btn-info" @click.prevent="set_data_row_undo(r)">
 									<span class="fa fa-undo"></span>
 								</button>
 							</tooltip>
 						</span>
+						<!-- Under Cell -->
 
 					</div>
 
@@ -88,7 +90,8 @@
 					</div>
 
 				</td>
-
+				
+				<!-- Under row -->
 				<td v-show="row_undo && row_undo === row.id && uv === false">
 					<tooltip text="Undo">
 						<button class="btn btn-xs btn-info" @click.prevent="set_data_row_undo(r)">
@@ -96,6 +99,7 @@
 						</button>
 					</tooltip>
 				</td>
+				<!-- Under Row -->
 
 			</tr>
 
@@ -156,14 +160,14 @@ export default {
 
 	props: {
 		config: { default() { return false } },
-		header: { default() { return {} } },
-		body: { default() { return {} } },
-		h: { default() { return false } },
-		v: { default() { return false } },
-		data: { default() { return {} } },
+		header: { default() { return {} } },// header key (sort property), class
+		body: { default() { return {} } },// body event, class, slot
+		h: { default() { return false } },// horizontal index
+		v: { default() { return false } },// vertical index
+		data: { default() { return {} } },// body data
 		contextmenu_edit_text: { default() { return 'Edit' } },
 		contextmenu_remove_text: { default() { return 'Remove' } },
-		hidden_column: { default() { return [] } }
+		hidden_column: { default() { return [] } }// vertical index want hide column
 	},
 
 	data() {
@@ -211,7 +215,6 @@ export default {
 				e.preventDefault();
 				this.$refs.ctxMenu.open(e, row)
 			}
-			
 		},
 
 		sort_colum(item) {
@@ -281,12 +284,13 @@ export default {
 
   	set_data_row_undo(index) {
   		this.$set(this.data, index, this.data_row_undo)
+  		this.$emit('undo_row_emit', JSON.parse(JSON.stringify(this.data_row_undo)))
   		this.data_row_undo = false
   		this.row_undo = false
   	},
 
     remove_row() {
-    	let remove_id = []
+    	let remove_id = [], is_confirm = false
     	if (this.checkbox.length > 0) {
     		if (confirm(
     			`Remove ${this.checkbox.length} ${(
@@ -298,6 +302,7 @@ export default {
     				remove_id.push(i)
     				this.data.splice(this.data.indexOf(obj), 1)
       		}
+      		is_confirm = true
     		}
     	} else {
     		let index = this.data.indexOf(this.context_menu_row),
@@ -308,11 +313,16 @@ export default {
     						: (index + 1) + ' TH'
   					)}`;
 				remove_id.push(index)
-    		if (confirm(confirmStr)) { this.data.splice(index, 1) }
+    		if (confirm(confirmStr)) { 
+    			this.data.splice(index, 1) 
+    			is_confirm = true
+    		}
     	}
     	this.context_menu_row = false
     	this.checkbox = []
-    	this.$emit('remove_row', remove_id)
+    	if (is_confirm) {
+    		this.$emit('remove_row', remove_id)
+    	}
     },
 
     find_by_id(id) { return this.data.find(obj => obj.id === id) }
