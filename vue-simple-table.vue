@@ -1,5 +1,5 @@
 <template>
-<div>
+<div :class="wrap_class">
 	<table :class="config.table_class">
 		
 		<thead :class="config.head_class">
@@ -7,7 +7,7 @@
 				<th v-show="config.show_increment">Icrement</th>
 				<th class="text-capitalize" v-for="(thead, index) in header" 
 				:class="thead.class" @click="sort_colum(thead)" 
-				v-show="hidden_column.indexOf(index) === -1">
+				v-show="hide_col.indexOf(index) === -1">
 
 					<span v-if="config.checkbox && index === 0 && !toggle_edit_row">
 						<input type="checkbox" v-model="checkall">
@@ -35,14 +35,21 @@
 				<td v-show="config.show_increment">{{ r+1 }}</td>
 
 				<td v-for="(item, k, c) in row" :key="item.id" 
-					:class="body[c] && body[c].class" v-show="hidden_column.indexOf(c) === -1">
+					:class="body[c] && body[c].class" v-show="hide_col.indexOf(c) === -1">
 
 					<div v-if="body[c] && body[c].hasOwnProperty('method') && has_ev(body[c].method) && !toggle_edit_row">
 						
 						<!-- Click -->
 						<div v-if="check_ev(body[c].method, 'click')" 
 						@click="click(check_ev(body[c].method, 'click'), row, r, c, k)">
-							{{ item }}
+							<span v-if="v === r && h === c">
+								<slot v-if="check_slot(body[c].method)" 
+								:name="check_slot(body[c].method)" v-bind="{row, r, c, k}"></slot>
+
+								<span v-else style="color: red">Can't find SLOT in PROP: "body.method.slot"</span>
+							</span>
+
+							<span v-else>{{ item }}</span>
 						</div>
 						<!-- Click -->
 						
@@ -50,13 +57,10 @@
 						<div v-else-if="check_ev(body[c].method, 'dblclick')"
 						@dblclick="dblclick(check_ev(body[c].method, 'dblclick'), row, r, c, k)">
 							<span v-if="v === r && h === c">
-
 								<slot v-if="check_slot(body[c].method)" 
-								:name="check_slot(body[c].method)"
-								:row="row" :r="r" :c="c" :k="k"></slot>
+								:name="check_slot(body[c].method)" v-bind="{row, r, c, k}"></slot>
 
-								<span v-else>Can't find <b>Slot</b></span>
-
+								<span v-else style="color: red">Can't find SLOT in PROP: "body.method.slot"</span>
 							</span>
 
 							<span v-else>{{ item }}</span>
@@ -66,11 +70,18 @@
 						<!-- Hover -->
 						<div v-else-if="check_ev(body[c].method, 'hover')"
 						@mouseover="hover(check_ev(body[c].method, 'hover'), row, r, c, k)">
-							{{ item }}
+							<span v-if="v === r && h === c">
+								<slot v-if="check_slot(body[c].method)" 
+								:name="check_slot(body[c].method)" v-bind="{row, r, c, k}"></slot>
+
+								<span v-else>Can't find SLOT in PROP: "body.method.slot"</span>
+							</span>
+
+							<span v-else style="color: red">{{ item }}</span>
 						</div>
 						<!-- Hover -->
 						
-						<!-- Under Cell -->
+						<!-- Undo Cell -->
 						<span class="simple-table-undo">
 							<tooltip text="Undo" v-show="row_undo && row_undo === row.id && uv === c && v !== r && h !== c">
 								<button class="btn btn-xs btn-info" @click.prevent="set_data_row_undo(r)">
@@ -78,7 +89,7 @@
 								</button>
 							</tooltip>
 						</span>
-						<!-- Under Cell -->
+						<!-- Undo Cell -->
 
 					</div>
 
@@ -91,7 +102,7 @@
 
 				</td>
 				
-				<!-- Under row -->
+				<!-- Undo row -->
 				<td v-show="row_undo && row_undo === row.id && uv === false">
 					<tooltip text="Undo">
 						<button class="btn btn-xs btn-info" @click.prevent="set_data_row_undo(r)">
@@ -99,7 +110,7 @@
 						</button>
 					</tooltip>
 				</td>
-				<!-- Under Row -->
+				<!-- Undo Row -->
 
 			</tr>
 
@@ -115,10 +126,16 @@
 	<context-menu v-if="config.edit_row" id="context-menu" ref="ctxMenu"
 	@ctx-open="onCtxOpen" @ctx-cancel="resetCtxLocals" @ctx-close="onCtxClose">
 	  <li @click.prevent="set_edit_row">
-	  	<i class="fa fa-wrench"></i> <span>{{ contextmenu_edit_text }}</span>
+	  	<span class="pull-right">
+	  		<i class="fa fa-wrench"></i>
+	  	</span>
+  	 	<span class="context-menu-right">{{ contextmenu_edit_text }}</span>
 	  </li>
 	  <li @click.prevent="remove_row">
-	  	<i class="fa fa-remove"></i> <span>{{ contextmenu_remove_text }}</span>
+	  	<span class="pull-right">
+	  		<i class="fa fa-remove"></i>
+	  	</span>
+	  	<span class="context-menu-right">{{ contextmenu_remove_text }}</span>
 	  </li>
 	  <slot name="list_context" :row="context_menu_row"></slot>
 	</context-menu>
@@ -162,12 +179,14 @@ export default {
 		config: { default() { return false } },
 		header: { default() { return {} } },// header key (sort property), class
 		body: { default() { return {} } },// body event, class, slot
-		h: { default() { return false } },// horizontal index
-		v: { default() { return false } },// vertical index
 		data: { default() { return {} } },// body data
 		contextmenu_edit_text: { default() { return 'Edit' } },
 		contextmenu_remove_text: { default() { return 'Remove' } },
-		hidden_column: { default() { return [] } }// vertical index want hide column
+		hide_col: { default() { return [] } },// vertical index want hide column
+		wrap_class: {
+			type: String,
+			default() { return 'table-responsive' }
+		}
 	},
 
 	data() {
@@ -179,7 +198,9 @@ export default {
 			column_sort: '',
 			row_undo: false,
 			data_row_undo: false,
-			uv: false// undo v
+			uv: false,// undo vertical index
+			h: false,// horizontal index
+			v: false// vertical index
 		}
 	},
 
@@ -253,9 +274,21 @@ export default {
 			return Object.keys(item)[1] == 'slot' ? item[Object.keys(item)[1]] : false;
 		},
 
-		click(Emit, row, r, c, k) { this.$emit(Emit, row, r, c, k) },
-		dblclick(Emit, row, r, c, k) { this.$emit(Emit, row, r, c, k) },
-		hover(Emit, row, r, c, k) { this.$emit(Emit, row, r, c, k) },
+		click(Emit, row, vertical_index, horizontal_index, k) {
+			this.v = vertical_index;
+			this.h = horizontal_index;
+			this.$emit(Emit, row[k])
+		},
+		dblclick(Emit, row, vertical_index, horizontal_index, k) {
+			this.v = vertical_index;
+			this.h = horizontal_index;
+			this.$emit(Emit, row[k])
+		},
+		hover(Emit, row, vertical_index, horizontal_index, k) {
+			this.v = vertical_index;
+			this.h = horizontal_index;
+			this.$emit(Emit, row[k])
+		},
 		// Event
 
 		onCtxOpen(row) { this.context_menu_row = row },
@@ -271,6 +304,11 @@ export default {
     	this.toggle_edit_row = false
     	if ( !clearContext) this.context_menu_row = false
     },
+
+  	cancel_edit_cell() {
+  		this.h = false
+  		this.v = false
+  	},
 
   	set_row_undo(row, v) {
   		this.data_row_undo = row
