@@ -1,7 +1,7 @@
 <template>
 <div :class="wrap_class">
 	<table :class="config.table_class">
-
+		
 		<thead :class="config.head_class">
 			<tr>
 				<th v-show="config.show_increment">Icrement</th>
@@ -20,7 +20,7 @@
 							'fa-caret-down' : toggle_sort === -1 && thead.key == column_sort
 						}"></i>
 					</span>
-
+					
 				</th>
 
 				<th></th>
@@ -28,8 +28,8 @@
 		</thead>
 
 		<tbody :class="config.body_class">
-			<tr v-for="(row, r) in data" :class="{'tr-active': context_menu_row && context_menu_row.id === row.id}"
-			@contextmenu="open_contextmenu($event, row)"
+			<tr v-for="(row, r) in data" @contextmenu="open_contextmenu($event, row)"
+			:class="{'tr-active': context_menu_row && context_menu_row.id === row.id}"
 			v-if="row.id !== toggle_edit_row">
 
 				<td v-show="config.show_increment">{{ r+1 }}</td>
@@ -38,7 +38,7 @@
 					:class="body[c] && body[c].class" v-show="hide_col.indexOf(c) === -1">
 
 					<div v-if="body[c] && body[c].hasOwnProperty('method') && has_ev(body[c].method) && !toggle_edit_row">
-
+						
 						<!-- Click -->
 						<div v-if="check_ev(body[c].method, 'click')" 
 						@click="click(check_ev(body[c].method, 'click'), row, r, c, k)">
@@ -52,7 +52,7 @@
 							<span v-else>{{ item }}</span>
 						</div>
 						<!-- Click -->
-
+						
 						<!-- Dblclick -->
 						<div v-else-if="check_ev(body[c].method, 'dblclick')"
 						@dblclick="dblclick(check_ev(body[c].method, 'dblclick'), row, r, c, k)">
@@ -66,7 +66,7 @@
 							<span v-else>{{ item }}</span>
 						</div>
 						<!-- Dblclick -->
-
+						
 						<!-- Hover -->
 						<div v-else-if="check_ev(body[c].method, 'hover')"
 						@mouseover="hover(check_ev(body[c].method, 'hover'), row, r, c, k)">
@@ -80,10 +80,10 @@
 							<span v-else style="color: red">{{ item }}</span>
 						</div>
 						<!-- Hover -->
-
+						
 						<!-- Undo Cell -->
 						<span class="simple-table-undo">
-							<button v-show="row_undo && row_undo === row.id && uv === c && v !== r && h !== c"
+							<button v-show="show_undo_cell(row.id, r, c)"
 							class="btn btn-xs btn-info" @click.prevent="set_data_row_undo(r)">
 								<span class="fa fa-undo"></span>
 							</button>
@@ -100,10 +100,10 @@
 					</div>
 
 				</td>
-
+				
 				<!-- Undo row -->
 				<td>
-					<span v-show="row_undo && row_undo === row.id && uv === false">
+					<span v-show="show_undo_row(row.id)">
 						<button class="btn btn-xs btn-info" @click.prevent="set_data_row_undo(r)">
 							<span class="fa fa-undo"></span>
 						</button>
@@ -124,19 +124,19 @@
 
 	<context-menu v-if="config.edit_row" id="context-menu" ref="ctxMenu"
 	@ctx-open="onCtxOpen" @ctx-cancel="resetCtxLocals" @ctx-close="onCtxClose">
-		<li @click.prevent="set_edit_row">
-			<span class="pull-right">
-				<i class="fa fa-wrench"></i>
-			</span>
-			<span class="context-menu-right">{{ contextmenu_edit_text }}</span>
-		</li>
-		<li @click.prevent="remove_row">
-			<span class="pull-right">
-				<i class="fa fa-remove"></i>
-			</span>
-			<span class="context-menu-right">{{ contextmenu_remove_text }}</span>
-		</li>
-		<slot name="list_context" :row="context_menu_row"></slot>
+	  <li @click.prevent="set_edit_row">
+	  	<span class="pull-right">
+	  		<i class="fa fa-wrench"></i>
+	  	</span>
+  	 	<span class="context-menu-right">{{ contextmenu_edit_text }}</span>
+	  </li>
+	  <li @click.prevent="remove_row">
+	  	<span class="pull-right">
+	  		<i class="fa fa-remove"></i>
+	  	</span>
+	  	<span class="context-menu-right">{{ contextmenu_remove_text }}</span>
+	  </li>
+	  <slot name="list_context" :row="context_menu_row"></slot>
 	</context-menu>
 
 	<!-- <context-menu v-else style="display: none" id="context-menu" ref="ctxMenu"></context-menu> -->
@@ -145,10 +145,10 @@
 
 <style>
 	.simple-table-undo {
-		float: right;
-		position: relative;
-		margin-top: -20px;
-		display: block;
+    float: right;
+    position: relative;
+    margin-top: -20px;
+    display: block;
 	}
 	.tr-active { background-color: rgba(148, 149, 158, 0.38) !important; }
 	.ctx-menu { font-size: 1em !important; min-width: 200px !important; }
@@ -156,15 +156,15 @@
 		padding: 5px 10px;
 		font-size: .9em;
 		font-weight: 600;
-		line-height: 1.5;
-		cursor: context-menu;
+    line-height: 1.5;
+    cursor: context-menu;
 	}
 	#context-menu li:not(:last-child) { border-bottom: 1px dotted #e3e3e3; }
 	#context-menu li > i.fa { padding: 0 5px; }
 	#context-menu li:hover { 
 		color: #2b2d2f;
-		text-decoration: none;
-		background-color: #f5f5f5;
+    text-decoration: none;
+    background-color: #f5f5f5;
 	}
 </style>
 
@@ -203,24 +203,24 @@ export default {
 	},
 
 	computed: {
-		checkall: {
-			get: function () {
-				return this.data 
-					? this.checkbox.length == this.data.length 
-					: false;
-			},
+    checkall: {
+      get: function () {
+        return this.data 
+        	? this.checkbox.length == this.data.length 
+        	: false;
+      },
 
-			set: function (value) {
-				var checkbox = [];
-				if (value) {
-					this.data.forEach(function (item) {
-						checkbox.push(item.id);
-					});
-				}
-				this.checkbox = checkbox;
-			}
-		}
-	},
+      set: function (value) {
+        var checkbox = [];
+        if (value) {
+          this.data.forEach(function (item) {
+            checkbox.push(item.id);
+          });
+        }
+        this.checkbox = checkbox;
+      }
+    }
+  },
 
 	watch: {
 		'checkbox': function(newVal) {
@@ -237,17 +237,18 @@ export default {
 		},
 
 		sort_colum(item) {
-			if ( !this.config.sort || !item.hasOwnProperty('key') || this.toggle_edit_row) return
+			if ( !this.config.sort || !item.hasOwnProperty('key') 
+				|| this.toggle_edit_row || this.v || this.h) return
 			if (item.key == 'id' && this.config.checkbox) return
 			this.toggle_sort = -(1) * this.toggle_sort
 			this.column_sort = item.key
 			this.data.sort((a, b) => {
 				if (typeof a[item.key] == 'string' && typeof b[item.key] == 'string') {
-					var nameA = a[item.key].toLowerCase(), nameB = b[item.key].toLowerCase()
-				} else {
-					var nameA = a[item.key], nameB = b[item.key]
-				}
-				return (nameA == nameB ? 0 : nameA < nameB ? -1 : 1) * (this.toggle_sort)
+			    var nameA = a[item.key].toLowerCase(), nameB = b[item.key].toLowerCase()
+			  } else {
+			  	var nameA = a[item.key], nameB = b[item.key]
+			  }
+        return (nameA == nameB ? 0 : nameA < nameB ? -1 : 1) * (this.toggle_sort)
 			})
 		},
 
@@ -290,78 +291,95 @@ export default {
 		// Event
 
 		onCtxOpen(row) { this.context_menu_row = row },
-		onCtxClose(row) {},
-		resetCtxLocals(row) { this.context_menu_row = false },
+    onCtxClose(row) {},
+    resetCtxLocals(row) { this.context_menu_row = false },
 
-		set_edit_row() {// context_menu_row when right click context menu onCtxOpen()
-			this.toggle_edit_row = this.context_menu_row.id
-			this.$emit('edit_row_emit', this.context_menu_row)
-		},
+    set_edit_row() {// context_menu_row when right click context menu onCtxOpen()
+    	this.toggle_edit_row = this.context_menu_row.id
+    	this.$emit('edit_row_emit', this.context_menu_row)
+    },
 
-		cancel_edit_row(clearContext) { 
-			this.toggle_edit_row = false
-			if ( !clearContext) this.context_menu_row = false
-		},
+    cancel_edit_row(clearContext) { 
+    	this.toggle_edit_row = false
+    	if ( !clearContext) this.context_menu_row = false
+    },
 
-		cancel_edit_cell() {
-			this.h = false
-			this.v = false
-		},
+  	cancel_edit_cell() {
+  		this.h = false
+  		this.v = false
+  	},
 
-		set_row_undo(row, v) {
-			this.data_row_undo = row
-			this.row_undo = row.id || false
-			if (v != undefined) {
-				this.uv = v
-			} else {
-				this.uv = false
-			}
-		},
+  	show_undo_cell(id, r, c) {
+  		if (this.config.hasOwnProperty('undo_cell') && this.config.undo_cell === true)
+	  		return (this.row_undo && this.row_undo === id
+	  		 	&& this.uv === c && this.v !== r && this.h !== c)
+	  	else
+	  		return false
+  	},
 
-		set_data_row_undo(index) {
-			this.$set(this.data, index, this.data_row_undo)
-			this.$emit('undo_row_emit', JSON.parse(JSON.stringify(this.data_row_undo)))
-			this.data_row_undo = false
-			this.row_undo = false
-		},
+  	show_undo_row(id) {
+  		if (this.config.hasOwnProperty('undo_row') && this.config.undo_row === true)
+  			return this.row_undo && this.row_undo === id && this.uv === false
+  		else
+  			return false
+  	},
 
-		remove_row() {
-			let remove_id = [], is_confirm = false
-			if (this.checkbox.length > 0) {
-				if (confirm(
-					`Remove ${this.checkbox.length} ${(
-						this.checkbox.length === 1 ? 'row' : 'rows'
-					)} has checked ?`
-				)) {
-					for (let i = this.checkbox.length -1; i >= 0; i--) {
-						let obj = this.data.filter(ob => ob.id === this.checkbox[i])[0]
-						remove_id.push(i)
-						this.data.splice(this.data.indexOf(obj), 1)
-					}
-					is_confirm = true
-				}
-			} else {
-				let index = this.data.indexOf(this.context_menu_row),
-						confirmStr = `Remove row: ${(
-							index + 1 === 1 ? '1 ST' 
-								: index + 1 === 2 ? '2 ND' 
-								: index + 1 === 3 ? '3 RD' 
-								: (index + 1) + ' TH'
-						)}`;
+  	set_row_undo(row, v) {
+  		this.data_row_undo = row
+  		this.row_undo = row.id || false
+  		if (v != undefined) {
+  			this.uv = v
+  		} else {
+  			this.uv = false
+  		}
+  	},
+
+  	set_data_row_undo(index) {
+  		this.$set(this.data, index, this.data_row_undo)
+  		this.$emit('undo_row_emit', JSON.parse(JSON.stringify(this.data_row_undo)))
+  		this.data_row_undo = false
+  		this.row_undo = false
+  	},
+
+    remove_row() {
+    	let remove_id = [], is_confirm = false, obj_id = []
+    	if (this.checkbox.length > 0) {
+    		if (confirm(
+    			`Remove ${this.checkbox.length} ${(
+    				this.checkbox.length === 1 ? 'row' : 'rows'
+  				)} has checked ?`
+  			)) {
+    			for (let i = this.checkbox.length -1; i >= 0; i--) {
+    				let obj = this.data.filter(ob => ob.id === this.checkbox[i])[0]
+    				remove_id.push(i)
+    				this.data.splice(this.data.indexOf(obj), 1)
+      		}
+      		is_confirm = true
+      		obj_id = JSON.parse(JSON.stringify(this.checkbox))
+    		}
+    	} else {
+    		let index = this.data.indexOf(this.context_menu_row),
+    				confirmStr = `Remove row: ${(
+    					index + 1 === 1 ? '1 ST' 
+    						: index + 1 === 2 ? '2 ND' 
+    						: index + 1 === 3 ? '3 RD' 
+    						: (index + 1) + ' TH'
+  					)}`;
 				remove_id.push(index)
-				if (confirm(confirmStr)) { 
-					this.data.splice(index, 1) 
-					is_confirm = true
-				}
-			}
-			this.context_menu_row = false
-			this.checkbox = []
-			if (is_confirm) {
-				this.$emit('remove_row', remove_id)
-			}
-		},
+    		if (confirm(confirmStr)) { 
+    			this.data.splice(index, 1) 
+    			is_confirm = true
+    			obj_id.push(this.context_menu_row.id)
+    		}
+    	}
+    	this.context_menu_row = false
+    	this.checkbox = []
+    	if (is_confirm) {
+    		this.$emit('remove_row', remove_id, obj_id)
+    	}
+    },
 
-		find_by_id(id) { return this.data.find(obj => obj.id === id) }
+    find_by_id(id) { return this.data.find(obj => obj.id === id) }
 	},
 
 	components: {
