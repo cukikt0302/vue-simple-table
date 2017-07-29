@@ -14,3 +14,22 @@ dependencies": {
   "vue-context-menu": "^2.0.2"
 }
 ```
+
+usage
+```
+<template>
+  <my-table :config="config" :header="header" :data="data"></my-table>
+</template>
+
+<script>
+import my_table form 'vue-simple-table'
+components: {
+  'my-table': my_table
+}
+
+or
+components {
+  'my-table': required('patTo/vueimpleTable.vue')
+}
+</script>
+```
