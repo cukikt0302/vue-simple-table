@@ -20,7 +20,7 @@ components: {
 
 or
 components {
-  'my-table': required('patTo/vueimpleTable.vue')
+  'my-table': required('vue-simple-table.vue')
 }
 </script>
 ```
