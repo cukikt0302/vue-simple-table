@@ -1,8 +1,8 @@
 # vue-simple-table Vue2+
 simple table inline edit
 
-Contain other component:
-[ [Vue Context Menu](http://https://github.com/vmaimone/vue-context-menu), [UIV](https://github.com/wxsms/uiv) ]
+Need to install another component
+[Vue Context Menu](http://https://github.com/vmaimone/vue-context-menu)
 
 ```
 dependencies": {
