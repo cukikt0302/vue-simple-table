@@ -2,10 +2,7 @@
 simple table inline edit
 
 Contain other component:
-https://github.com/vmaimone/vue-context-menu
-https://github.com/wxsms/uiv
-
-Demo & example https://cukikt0302.github.io/vue-simple-table/index.html
+[ [Vue Context Menu](http://https://github.com/vmaimone/vue-context-menu), [UIV](https://github.com/wxsms/uiv) ]
 
 ```
 dependencies": {
@@ -14,6 +11,8 @@ dependencies": {
   "vue-context-menu": "^2.0.2"
 }
 ```
+
+Demo & example https://cukikt0302.github.io/vue-simple-table/index.html
 
 usage
 ```
