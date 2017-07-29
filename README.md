@@ -4,14 +4,6 @@ simple table inline edit
 Need to install another component
 [Vue Context Menu](http://https://github.com/vmaimone/vue-context-menu)
 
-```
-dependencies": {
-  "uiv": "^0.11.4",
-  "vue": "^2.3.3",
-  "vue-context-menu": "^2.0.2"
-}
-```
-
 Demo & example https://cukikt0302.github.io/vue-simple-table/index.html
 
 usage
