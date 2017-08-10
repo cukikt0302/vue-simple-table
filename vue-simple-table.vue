@@ -23,7 +23,7 @@
 					
 				</th>
 
-				<th></th>
+				<th v-show="config.hasOwnProperty('undo_row') && config.undo_row"></th>
 			</tr>
 		</thead>
 
@@ -102,7 +102,7 @@
 				</td>
 				
 				<!-- Undo row -->
-				<td>
+				<td v-show="config.hasOwnProperty('undo_row') && config.undo_row">
 					<span v-show="show_undo_row(row.id)">
 						<button class="btn btn-xs btn-info" @click.prevent="set_data_row_undo(r)">
 							<span class="fa fa-undo"></span>
@@ -169,7 +169,11 @@
 </style>
 
 <script>
-
+/*
+ * Author: Nguyen Ke Nhat
+ * Create at: 04/14/2017
+ * Github: https://github.com/cukikt0302/vue-simple-table
+*/
 export default {
 	name: 'vue-simple-table',
 
@@ -307,6 +311,14 @@ export default {
   	cancel_edit_cell() {
   		this.h = false
   		this.v = false
+  	},
+
+  	close(clearContext) {
+  		this.toggle_edit_row = false
+    	this.h = false
+  		this.v = false
+  		// set tr-active class, after edit row
+  		if ( !clearContext) this.context_menu_row = false
   	},
 
   	show_undo_cell(id, r, c) {
