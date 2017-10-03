@@ -34,7 +34,7 @@
 
 				<td v-show="config.show_increment">{{ r+1 }}</td>
 
-				<td v-for="(item, k, c) in row" :key="item.id" 
+				<td v-for="(item, k, c) in row" :key="`${k}--${c}`" 
 					:class="body[c] && body[c].class" v-show="hide_col.indexOf(c) === -1">
 
 					<div v-if="body[c] && body[c].hasOwnProperty('method') && has_ev(body[c].method) && !toggle_edit_row">
@@ -49,7 +49,7 @@
 								<span v-else style="color: red">Can't find SLOT in PROP: "body.method.slot"</span>
 							</span>
 
-							<span v-else>{{ item }}</span>
+							<span v-else>{{ item || default_cell }}</span>
 						</div>
 						<!-- Click -->
 						
@@ -96,7 +96,7 @@
 						<span v-if="config.checkbox && k == 'id' && c === 0 && !toggle_edit_row">
 							<input type="checkbox" :value="item" v-model="checkbox">
 						</span>
-						<span v-else>{{ item }}</span>
+						<span v-else>{{ item || default_cell }}</span>
 					</div>
 
 				</td>
@@ -185,10 +185,8 @@ export default {
 		contextmenu_edit_text: { default() { return 'Edit' } },
 		contextmenu_remove_text: { default() { return 'Remove' } },
 		hide_col: { default() { return [] } },// vertical index want hide column
-		wrap_class: {
-			type: String,
-			default() { return 'table-responsive' }
-		}
+		wrap_class: { type: String, default() { return 'table-responsive' } },
+		default_cell: { default() { return '' } }
 	},
 
 	data() {
