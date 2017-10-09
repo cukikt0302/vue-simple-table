@@ -34,7 +34,7 @@
 
 				<td v-show="config.show_increment">{{ r+1 }}</td>
 
-				<td v-for="(item, k, c) in row" :key="`${k}--${c}`" 
+				<td v-for="(item, k, c) in row" :key="item.id" 
 					:class="body[c] && body[c].class" v-show="hide_col.indexOf(c) === -1">
 
 					<div v-if="body[c] && body[c].hasOwnProperty('method') && has_ev(body[c].method) && !toggle_edit_row">
@@ -46,10 +46,11 @@
 								<slot v-if="check_slot(body[c].method)" 
 								:name="check_slot(body[c].method)" v-bind="{row, r, c, k}"></slot>
 
-								<span v-else style="color: red">Can't find SLOT in PROP: "body.method.slot"</span>
+								<!-- <span v-else style="color: red">Can't find slot property: "body.method.slot"</span> -->
+								<span v-else>{{ item }}</span>
 							</span>
 
-							<span v-else>{{ item || default_cell }}</span>
+							<span v-else>{{ item }}</span>
 						</div>
 						<!-- Click -->
 						
@@ -96,7 +97,7 @@
 						<span v-if="config.checkbox && k == 'id' && c === 0 && !toggle_edit_row">
 							<input type="checkbox" :value="item" v-model="checkbox">
 						</span>
-						<span v-else>{{ item || default_cell }}</span>
+						<span v-else>{{ item }}</span>
 					</div>
 
 				</td>
@@ -122,15 +123,15 @@
 
 	</table>
 
-	<context-menu v-if="config.edit_row" id="context-menu" ref="ctxMenu"
+	<context-menu v-if="config.context_menu" id="context-menu" ref="ctxMenu"
 	@ctx-open="onCtxOpen" @ctx-cancel="resetCtxLocals" @ctx-close="onCtxClose">
-	  <li @click.prevent="set_edit_row">
+	  <li v-if="config.edit_row" @click.prevent="set_edit_row">
 	  	<span class="pull-right">
 	  		<i class="fa fa-wrench"></i>
 	  	</span>
   	 	<span class="context-menu-right">{{ contextmenu_edit_text }}</span>
 	  </li>
-	  <li @click.prevent="remove_row">
+	  <li v-if="config.delete_row" @click.prevent="remove_row">
 	  	<span class="pull-right">
 	  		<i class="fa fa-remove"></i>
 	  	</span>
@@ -182,11 +183,10 @@ export default {
 		header: { default() { return {} } },// header key (sort property), class
 		body: { default() { return {} } },// body event, class, slot
 		data: { default() { return {} } },// body data
-		contextmenu_edit_text: { default() { return 'Edit' } },
-		contextmenu_remove_text: { default() { return 'Remove' } },
+		contextmenu_edit_text: { type: String, default() { return 'Edit' } },
+		contextmenu_remove_text: { type: String, default() { return 'Remove' } },
 		hide_col: { default() { return [] } },// vertical index want hide column
-		wrap_class: { type: String, default() { return 'table-responsive' } },
-		default_cell: { default() { return '' } }
+		wrap_class: {type: String, default() { return '' }}
 	},
 
 	data() {
@@ -232,7 +232,7 @@ export default {
 
 	methods: {
 		open_contextmenu(e, row) {
-			if (this.config && this.config.edit_row) {
+			if (this.config && this.config.context_menu) {
 				e.preventDefault();
 				this.$refs.ctxMenu.open(e, row)
 			}
