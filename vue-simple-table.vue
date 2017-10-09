@@ -34,7 +34,7 @@
 
 				<td v-show="config.show_increment">{{ r+1 }}</td>
 
-				<td v-for="(item, k, c) in row" :key="item.id" 
+				<td v-for="(item, k, c) in row" :key="`${k}--${c}`" 
 					:class="body[c] && body[c].class" v-show="hide_col.indexOf(c) === -1">
 
 					<div v-if="body[c] && body[c].hasOwnProperty('method') && has_ev(body[c].method) && !toggle_edit_row">
@@ -47,10 +47,10 @@
 								:name="check_slot(body[c].method)" v-bind="{row, r, c, k}"></slot>
 
 								<!-- <span v-else style="color: red">Can't find slot property: "body.method.slot"</span> -->
-								<span v-else>{{ item }}</span>
+								<span v-else>{{ item || default_cell }}</span>
 							</span>
 
-							<span v-else>{{ item }}</span>
+							<span v-else>{{ item || default_cell }}</span>
 						</div>
 						<!-- Click -->
 						
@@ -64,7 +64,7 @@
 								<span v-else style="color: red">Can't find SLOT in PROP: "body.method.slot"</span>
 							</span>
 
-							<span v-else>{{ item }}</span>
+							<span v-else>{{ item || default_cell }}</span>
 						</div>
 						<!-- Dblclick -->
 						
@@ -186,7 +186,8 @@ export default {
 		contextmenu_edit_text: { type: String, default() { return 'Edit' } },
 		contextmenu_remove_text: { type: String, default() { return 'Remove' } },
 		hide_col: { default() { return [] } },// vertical index want hide column
-		wrap_class: {type: String, default() { return '' }}
+		wrap_class: { type: String, default() { return '' } },
+		default_cell: { type: String, default() { return '' } }
 	},
 
 	data() {
