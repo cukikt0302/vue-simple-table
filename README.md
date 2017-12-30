@@ -2,7 +2,7 @@
 simple table inline edit
 
 Need to install another component
-[Vue Context Menu](http://https://github.com/vmaimone/vue-context-menu)
+[Vue Context Menu](https://github.com/vmaimone/vue-context-menu)
 
 Demo & example https://cukikt0302.github.io/vue-simple-table/index.html
 
